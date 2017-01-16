@@ -1,15 +1,13 @@
 #!/bin/bash
 
-X=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep percent | awk '{print $2}' | cut -d'%' -f1)
+state="$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | sed -ne 's/\s*state:\s*\(\w*\)/\1/p')"
 
-if [ $X -lt 10 ]
-then
-	notify-send "Oh no! Your battery is dying!"\
-				$X"%"
+if [ $state = 'charging' ]; then
+	exit
 fi
 
-# evaluate $X > 10 
-# if true 
-# notify-send
+percentage="$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | sed -ne 's/\s*percentage:\s*\(\w*\)%/\1/p')"
 
-
+if (( $percentage <= 100 )); then
+	notify-send "Oh no! Your battery is dying!" $percentage"%"
+fi
